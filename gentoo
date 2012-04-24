@@ -104,7 +104,7 @@ _pkgname()
             # When we've completed most of the name, also display the version for
             # possible completion.
             if [[ ${#COMPREPLY[@]} -le 1 || ${cur:${#cur}-1:1} == "-" ]] && 
-                    [[ ${cur} != */ ]]; then
+                    [[ ${cur} != */ && ${prev} == '=' ]]; then
             # The portage cache is appropriate to complete specific versions from.
             COMPREPLY=(${COMPREPLY[@]} $(\
                         for pd in ${portdir} ; do \
@@ -156,7 +156,7 @@ _pkgname()
     esac
     # 'equery' wants an '=' in front of specific package versions.
     # Add it if there is only one selected package and it isn't there already.
-    if [[ ${#COMPREPLY[@]} == 1 && ${COMP_WORDS[COMP_CWORD]:0:1} != "=" ]]
+    if [[ ${#COMPREPLY[@]} == 1 && ${prev} != "=" ]]
     then
         [[ -z "${only}" ]] && COMPREPLY=("="$COMPREPLY)
     fi
@@ -1164,7 +1164,7 @@ _equery()
     f?(iles))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             # --filter=<list>: completion of the files types list
             if [[ ${prev} == "-f" || "${cur}" == "--filter="* ]] ; then
                 COMPREPLY=($(_list_compgen "${cur#--filter=}" , \
