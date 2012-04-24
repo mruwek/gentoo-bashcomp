@@ -87,6 +87,12 @@ _pkgname()
                 only=1
                 _pkgname_only ${cur} @GENTOO_PORTAGE_EPREFIX@/var/db/pkg
             fi
+            # 'equery' wants an '=' in front of specific package versions.
+            # Add it if there is only one selected package and it isn't there already.
+            if [[ ${#COMPREPLY[@]} == 1 && ${prev} != "=" ]]
+            then
+                [[ -z "${only}" ]] && COMPREPLY=("="$COMPREPLY)
+            fi
         ;;
     -A)
         # Complete either the category or the complete package name
@@ -154,12 +160,6 @@ _pkgname()
         # Somebody screwed up! :-)
         ;;
     esac
-    # 'equery' wants an '=' in front of specific package versions.
-    # Add it if there is only one selected package and it isn't there already.
-    if [[ ${#COMPREPLY[@]} == 1 && ${prev} != "=" ]]
-    then
-        [[ -z "${only}" ]] && COMPREPLY=("="$COMPREPLY)
-    fi
 }
 
 #
@@ -1144,7 +1144,7 @@ _equery()
         ;;
     c?(hanges))
         # Complete package name only if it is not yet supplied. 
-        if [[ ${prev} == ${mode} ]]; then
+        if [[ ${prev} == ${mode} || ${prev} == '=' ]]; then
             case $cur in
                 -*)
                     COMPREPLY=($(compgen -W "-h --help" -- $cur))
@@ -1195,7 +1195,7 @@ _equery()
     y|keywords)
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             case "${cur}" in
                 -*)
                     COMPREPLY=($(compgen -W "-h --help -v --version -a --arch -A
@@ -1211,7 +1211,7 @@ _equery()
     l?(ist))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
         case "${cur}" in
             -*)
             COMPREPLY=($(compgen -W "-h --help -d --duplicates -b
@@ -1232,7 +1232,7 @@ _equery()
     b?(elongs))
         # Only complete if the previous entry on the command line is not
         # a file name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             case $cur in
                 -*)
                     COMPREPLY=($(compgen -W "-h --help -f --full-regex -e
@@ -1248,7 +1248,7 @@ _equery()
     u?(ses))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             case $cur in
                 -*)
                     COMPREPLY=($(compgen -W "-h --help -a --all" -- $cur))
@@ -1263,7 +1263,7 @@ _equery()
     w?(hich))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             case $cur in
                 -*)
                     COMPREPLY=($(compgen -W "-h --help -m --include-masked" -- $cur))
@@ -1278,7 +1278,7 @@ _equery()
     g|depgraph)
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             case $cur in
             -*)
                 COMPREPLY=($(compgen -W "-h --help -A --no-atom -M --no-mask -U
@@ -1294,7 +1294,7 @@ _equery()
     d?(epends))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
         case $cur in
             -*)
                 COMPREPLY=($(compgen -W "-h --help -a --all-packages -D
@@ -1318,14 +1318,14 @@ _equery()
     m?(eta))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
             _equery_meta $cur
         fi
         ;;
     k|check)
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} ]]; then
+        if [[ ${prev} == ${mode} || ${prev} == '=' ]]; then
             case $cur in
                 -*)
                     COMPREPLY=($(compgen -W "${COMPREPLY[@]} -h --help -f
@@ -1341,7 +1341,7 @@ _equery()
     s?(ize))
         # Only complete if the previous entry on the command line is not
         # a package name.
-        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" ]]; then
+        if [[ ${prev} == ${mode} || ${prev:0:1} == "-" || ${prev} == '=' ]]; then
         case $cur in
             -*)
             COMPREPLY=($(compgen -W "-h --help -b --bytes -f
