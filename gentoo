@@ -108,10 +108,13 @@ _pkgname()
             # The portage cache is appropriate to complete specific versions from.
             COMPREPLY=(${COMPREPLY[@]} $(\
                         for pd in ${portdir} ; do \
-                            if [[ -d ${pd}/metadata/cache ]] ; then \
-                                builtin cd ${pd}/metadata/cache; \
-                                compgen -W "$(compgen -G "${cur}*")" -- "${cur}" ; \
-                            fi ; \
+                            if [[ -d ${pd}/metadata/md5-cache ]]; then
+                                builtin cd ${pd}/metadata/md5-cache;
+                                compgen -W "$(compgen -G "${cur}*")" -- "${cur}";
+                            elif [[ -d ${pd}/metadata/cache ]]; then
+                                builtin cd ${pd}/metadata/cache;
+                                compgen -W "$(compgen -G "${cur}*")" -- "${cur}";
+                            fi;
                         done))
             fi
         else
@@ -128,13 +131,16 @@ _pkgname()
             local words=$(echo -e ${w} | sort -u)
 
             COMPREPLY=($(compgen -W "$words" -- $cur))
-                if [[ ${#COMPREPLY[@]} == 1 ]]; then
-            COMPREPLY=($(compgen -W "$(\
-                    for pd in ${portdir} ; do \
-                        if [[ -d ${pd}/metadata/cache ]] ; then
-                            builtin cd ${pd}/metadata/cache; \
-                            compgen -G "$COMPREPLY*" ; \
-                        fi ; \
+            if [[ ${#COMPREPLY[@]} == 1 ]]; then
+                COMPREPLY=($(compgen -W "$(\
+                    for pd in ${portdir} ; do
+                        if [[ -d ${pd}/metadata/md5-cache ]]; then
+                            builtin cd ${pd}/metadata/md5-cache;
+                            compgen -G "$COMPREPLY*";
+                        elif [[ -d ${pd}/metadata/cache ]]; then
+                            builtin cd ${pd}/metadata/cache;
+                            compgen -G "$COMPREPLY*";
+                        fi
                     done)" -- $cur))
             fi
         fi
